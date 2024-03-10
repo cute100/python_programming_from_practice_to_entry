@@ -1,0 +1,60 @@
+class Car:
+    """一次模拟汽车的简单尝试"""
+    def __init__(self,make,modle,year):
+        self.make=make
+        self.modle=modle
+        self.year=year
+        self.odometer_reading=0
+
+    def get_descriptive_name(self):
+        """返回整洁的描述性名称"""
+        long_name=f"{self.year}{self.make}{self.modle}"
+        return  long_name.title()
+    def read_odometer(self):
+        """打印一条支出汽车里程的消息"""
+        print(f"This car has {self.odometer_reading} miles on it")
+    def updata_odometer(self,mileage):
+        if mileage>=self.odometer_reading:
+            self.odometer_reading=mileage
+        else:
+            print("You can't roll back an odometer!")
+    def increment_odometer(self,miles):
+        """将里程表读数增加指定的量"""
+        self.odometer_reading+=miles
+
+class Battery:
+    """一次模拟电动汽车电池的简单尝试"""
+    def __init__(self,battery_size=40):
+        """初始化电池的属性"""
+        self.battery_size=battery_size
+
+    def describe_battery(self):
+        """打印一条描述电池容量的消息"""
+        print(f"This car has a {self.battery_size}-kWh battery.")
+    def get_range(self):
+        """打印一条消息，指出电池的续航里程"""
+        if self.battery_size==40:
+            range=150
+        elif self.battery_size==65:
+            range=225
+        print(f"This car can go about {range} miles on a full charge")
+    def upgrade_battery(self):
+        """在可能的情况下将电池审计"""
+        if self.battery_size==40:
+            self.battery_size=65
+            print('Upgranded the battery to 65 kWh')
+        else:
+            print('The battery is already upgraded.')
+class ElectricCar(Car):
+    """电动汽车的独特之处"""
+    def __init__(self,make,model,year):
+        """初始化父类的属性
+        再初始化电动汽车特有的属性"""
+        super().__init__(make,model,year)
+        self.battery=Battery()
+print("Make an electric car, and check the range:")
+my_leaf = ElectricCar('nissan', 'leaf', 2024)
+my_leaf.battery.get_range()
+print("\nUpgrade the battery, and check the range again:")
+my_leaf.battery.upgrade_battery()
+my_leaf.battery.get_range()
