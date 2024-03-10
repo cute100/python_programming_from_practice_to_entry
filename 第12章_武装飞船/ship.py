@@ -6,7 +6,7 @@ class Ship:
         """初始化飞船并设置其初始位置"""
         """接受两个参数，除了self引用，还有一个指向AlienInvasiom实例的引用"""
         self.screen=ai_game.screen # 将屏幕赋给Ship的一个属性
-        self.settings=ai_game.setting
+        self.settings=ai_game.settings
         self.screen_rect=ai_game.screen.get_rect()# 屏幕位置外接矩形
 
         #加载飞船图像并获取其外接矩形
@@ -38,3 +38,8 @@ class Ship:
     def blitme(self):
         """在指定位置绘制飞船"""
         self.screen.blit(self.image,self.rect)
+
+    def center_ship(self):
+        """将飞船放置在屏幕底部的中央"""
+        self.rect.midbottom=self.screen_rect.midbottom
+        self.x=float(self.rect.x)

@@ -4,6 +4,8 @@ from settings import Settings
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
+from time import  sleep
+from game_stats import GameStats
 
 class AlienInvasion: #创建一个名为AlienInvasion的类。
     def __init__(self):
@@ -11,12 +13,12 @@ class AlienInvasion: #创建一个名为AlienInvasion的类。
         pygame.init() #调用pygame.init()初始化背景，让pygame能够正常的工作。
         self.clock=pygame.time.Clock()
 
-        self.setting=Settings()
+        self.settings=Settings()
 
         # self.screen=pygame.display.set_mode((0,0),pygame.FULLSCREEN)
         # self.setting.screen_width=self.screen.get_rect().width
         # self.setting.screen_heghit=self.screen.get_rect().height
-        self.screen=pygame.display.set_mode((self.setting.screen_width,self.setting.screen_heghit))
+        self.screen=pygame.display.set_mode((self.settings.screen_width,self.settings.screen_heghit))
 
         # self.bg_color=(230,230,230)
         # self.screen=pygame.display.set_mode((1200,800))#调用pygame.display.set_mode创建一个显示窗口并指定窗口的尺寸--宽1200像素
@@ -27,7 +29,10 @@ class AlienInvasion: #创建一个名为AlienInvasion的类。
 
 
         pygame.display.set_caption("Alien Invasion")#设置当前窗口标题Alien Invasion。
-        self.bg_color=(self.setting.bg_color)
+        self.bg_color=(self.settings.bg_color)
+
+        # 创建一个用于存储游戏统计信息放入实例
+        self.stats = GameStats(self)
 
         self.ship=Ship(self)
 
@@ -52,8 +57,8 @@ class AlienInvasion: #创建一个名为AlienInvasion的类。
         alien=Alien(self)
         alien_width,alien_height=alien.rect.size
         current_x,current_y=alien_width,alien_height
-        while current_y<(self.setting.screen_heghit-3*alien_height):
-            while current_x < (self.setting.screen_width - 2 * alien_width):
+        while current_y<(self.settings.screen_heghit-3*alien_height):
+            while current_x < (self.settings.screen_width - 2 * alien_width):
                 self._crate_alien(current_x,current_y)
                 current_x+=2*alien_width
 
@@ -75,6 +80,10 @@ class AlienInvasion: #创建一个名为AlienInvasion的类。
         self._check_fleet_edges()
         self.aliens.update()
 
+        #检测外星人和飞船之间得到碰撞
+        if pygame.sprite.spritecollideany(self.ship,self.aliens):
+            self._ship_hit()
+
     def _update_bullets(self):
         """更新子弹位置并删除已消失的子弹"""
         #更新子弹的位置
@@ -84,6 +93,20 @@ class AlienInvasion: #创建一个名为AlienInvasion的类。
             if bullet.rect.bottom<=0:
                 self.bullets.remove(bullet)
         print(len(self.bullets))
+        self._cheak_bullet_alien_collisions()
+
+    def _cheak_bullet_alien_collisions(self):
+        # 检查是否有子弹击中了外星人
+        # 如果是，就删除相应的子弹和外星人
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+
+        if not self.aliens:
+            #删除现有的子弹并创建一个新的外星舰队
+            self.bullets.empty()
+            self._create_fleet()
+
+
+
     def _check_enent(self):
             #倾听键盘和鼠标事件
             for event in pygame.event.get():
@@ -109,7 +132,7 @@ class AlienInvasion: #创建一个名为AlienInvasion的类。
                 self.ship.moving_left=False
     def _fire_bullet(self):
         """创建一颗子弹，并将其加入编组bullets"""
-        if len(self.bullets)<self.setting.bullets_allowed:
+        if len(self.bullets)<self.settings.bullets_allowed:
             new_bullet=Bullet(self)
             self.bullets.add(new_bullet)
     def _update_screen(self):
@@ -133,8 +156,23 @@ class AlienInvasion: #创建一个名为AlienInvasion的类。
     def _change_fleet_direction(self):
         """将整个舰队向下移动，并改变他们的方向"""
         for alien in self.aliens.sprites():
-            alien.rect.y+=self.setting.fleet_drop_speed
-        self.setting.fleet_direction*=-1
+            alien.rect.y+=self.settings.fleet_drop_speed
+        self.settings.fleet_direction*=-1
+
+    def _ship_hit(self):
+        """响应飞船和外星人碰撞"""
+        #将ship_left减1
+        self.stats.ships_left-=1
+        #清空外星人列表和子弹列表
+        self.bullets.empty()
+        self.aliens.empty()
+
+        #创建一个新的外星舰队，并将飞船放在屏幕底部的中央
+        self._create_fleet()
+        self.ship.center_ship()
+
+        #暂停
+        sleep(0.5)
 
 
 if __name__=="__main__":
