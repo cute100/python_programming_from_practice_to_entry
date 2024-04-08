@@ -1,6 +1,5 @@
 import sys
 from time import sleep
-
 import pygame
 
 from settings import Settings

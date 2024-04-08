@@ -44,6 +44,7 @@ class AlienInvasion: #创建一个名为AlienInvasion的类。
 
         #游戏启动后处于活动状态
         self.game_active=False
+        print(self.game_active)
 
         #创建Play按钮
         self.play_button=Button(self,"Play")
@@ -114,6 +115,7 @@ class AlienInvasion: #创建一个名为AlienInvasion的类。
             #删除现有的子弹并创建一个新的外星舰队
             self.bullets.empty()
             self._create_fleet()
+            self.settings.increase_speed()
 
 
 
@@ -123,9 +125,42 @@ class AlienInvasion: #创建一个名为AlienInvasion的类。
                 if event.type==pygame.QUIT:
                     sys.exit()
                 elif event.type==pygame.KEYDOWN:
+                    print(event.key)
                     self._check_keydown_events(event)
                 elif event.type == pygame.KEYUP:
                     self._check_keyup_events(event)
+
+                elif event.type==pygame.MOUSEBUTTONDOWN:
+                    mouse_pos=pygame.mouse.get_pos()
+                    self._check_play_button(mouse_pos)
+    def _check_play_button(self,mouse_pos):
+        """在玩家单击Play按钮时开始新游戏"""
+        button_clicked=self.play_button.rect.collidepoint(mouse_pos)
+        if button_clicked and not self.game_active:
+            #还原游戏设置
+            self.settings.initialize_dynamic_settings()
+            self._start_game()
+
+    def _start_game(self):
+        print("Starting the game")
+        # 重置游戏统计信息
+        self.stats.reset_stats()
+        self.game_active = True
+        # 清空外星人列表和子弹列表
+        self.bullets.empty()
+        self.aliens.empty()
+
+        # 创建一个新的外星舰队，并将飞船放在屏幕底部的中央
+        self._create_fleet()
+        self.ship.center_ship()
+
+        # 隐藏光标
+        pygame.mouse.set_visible(False)
+
+        # 确保游戏状态的及时更新
+        self._update_screen()
+
+
     def _check_keydown_events(self,event):
             if event.key==pygame.K_RIGHT:
                 self.ship.moving_right=True
@@ -135,6 +170,10 @@ class AlienInvasion: #创建一个名为AlienInvasion的类。
                 sys.exit()
             elif event.key==pygame.K_SPACE:
                 self._fire_bullet()
+            elif (event.key == pygame.K_p) and (not self.game_active):
+                print("P key pressed for starting the game")
+                self._start_game()
+
     def _check_keyup_events(self, event):
             if event.key==pygame.K_RIGHT:
                 self.ship.moving_right=False
@@ -192,6 +231,7 @@ class AlienInvasion: #创建一个名为AlienInvasion的类。
 
         else:
             self.game_active=False
+            pygame.mouse.set_visible(True)
 
     def _check_aliens_bottom(self):
         """检查是否有外星人到达了屏幕的下边缘"""
