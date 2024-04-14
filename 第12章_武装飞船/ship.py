@@ -1,10 +1,12 @@
 import pygame
 from settings import Settings
-class Ship:
+from pygame.sprite import Sprite
+class Ship(Sprite):
     """管理飞船的类"""
     def __init__(self,ai_game):
         """初始化飞船并设置其初始位置"""
         """接受两个参数，除了self引用，还有一个指向AlienInvasiom实例的引用"""
+        super().__init__()
         self.screen=ai_game.screen # 将屏幕赋给Ship的一个属性
         self.settings=ai_game.settings
         self.screen_rect=ai_game.screen.get_rect()# 屏幕位置外接矩形
